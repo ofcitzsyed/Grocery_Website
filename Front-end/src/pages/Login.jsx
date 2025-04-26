@@ -14,7 +14,7 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     try {
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
@@ -23,16 +23,19 @@ const Login = () => {
         },
         body: JSON.stringify({ email, password }),
       });
-
+  
       const data = await res.json();
-
+  
       if (res.status === 200) {
         alert("Login successful!");
         console.log("Received token:", data.access_token);
-
-        // Save the token (optional - for protected routes later)
+  
+        // Save token
         localStorage.setItem("token", data.access_token);
-
+  
+        // Save user info
+        localStorage.setItem("user", JSON.stringify(data.user));
+  
         // Redirect to homepage/dashboard
         navigate("/home");
         
@@ -44,6 +47,7 @@ const Login = () => {
       alert("Server error. Please try again later.");
     }
   };
+  
 
   return (
     <div className="min-h-screen flex">

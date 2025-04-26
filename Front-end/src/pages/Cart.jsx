@@ -1,102 +1,146 @@
 import { Minus, Plus } from "lucide-react";
 import Header from "../component/Header";
 import Footer from "../component/Footer";
+import { useState, useEffect } from "react";
 
 const Cart = () => {
-  const cartItem = {
-    name: "Strawberry - Premium",
-    price: 71.84,
-    mrp: 94.52,
-    quantity: 1,
-    image: "/assets/products/straw1.jpg",
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/cart");
+        const data = await response.json();
+        setCartItems(data);
+      } catch (error) {
+        console.error("Error fetching cart:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCart();
+  }, []);
+
+  const handleQuantityChange = async (cartItemId, quantity) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/cart/${cartItemId}/update`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ quantity }),
+      });
+
+      if (response.ok) {
+        setCartItems((prevItems) =>
+          prevItems.map((item) =>
+            item._id === cartItemId ? { ...item, quantity } : item
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+    }
   };
 
-  const similarProducts = [
-    "/assets/products/similar1.jpg",
-    "/assets/products/similar2.jpg",
-    "/assets/products/similar3.jpg",
-    "/assets/products/similar4.jpg",
-  ];
+  const handleRemoveItem = async (cartItemId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/cart/${cartItemId}/remove`, {
+        method: "DELETE",
+      });
 
-  const savings = (cartItem.mrp - cartItem.price) * cartItem.quantity;
+      if (response.ok) {
+        setCartItems((prevItems) => prevItems.filter((item) => item._id !== cartItemId));
+      }
+    } catch (error) {
+      console.error("Error removing item:", error);
+    }
+  };
+
+  const savings = (item) => (item.mrp - item.price) * item.quantity;
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <main>
-        <Header />
-            <div className="p-6 max-w-[1200px] mx-auto text-gray-800">
+      <Header />
+      <div className="p-6 max-w-[1200px] mx-auto text-gray-800">
         {/* Basket Summary */}
         <h2 className="text-lg font-semibold mb-4">Your Basket</h2>
         <div className="bg-zinc-900 text-white rounded-xl flex justify-between items-center px-6 py-4 mb-6">
-            <div>
+          <div>
             <p className="text-sm">
-                Subtotal (1 item): <span className="font-semibold">₹ {cartItem.price.toFixed(2)}</span>
+              Subtotal ({cartItems.length} items):{" "}
+              <span className="font-semibold">
+                ₹{" "}
+                {cartItems.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2)}
+              </span>
             </p>
-            <p className="text-green-400 text-sm mt-1">Savings: ₹ {savings.toFixed(2)}</p>
-            </div>
-            <button className="bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-6 py-2 rounded-lg transition-transform hover:scale-105">
+            <p className="text-green-400 text-sm mt-1">
+              Savings: ₹{" "}
+              {cartItems.reduce((total, item) => total + savings(item), 0).toFixed(2)}
+            </p>
+          </div>
+          <button className="bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-6 py-2 rounded-lg transition-transform hover:scale-105">
             Checkout
-            </button>
+          </button>
         </div>
 
-        {/* Cart Item */}
-        <div className="grid grid-cols-12 text-sm font-medium text-gray-400 mb-3">
-            <div className="col-span-6">Items (1 item)</div>
-            <div className="col-span-3">Quantity</div>
-            <div className="col-span-3 text-right">Sub-total</div>
-        </div>
-
-        <div className="grid grid-cols-12 items-center py-4 border-b">
-            <div className="col-span-6 flex items-center gap-4">
-            <img src={cartItem.image} alt="Strawberry" className="w-20 h-20 object-cover rounded" />
-            <div>
-                <p className="font-medium">{cartItem.name}</p>
-                <p className="text-sm text-gray-700">
-                ₹{cartItem.price.toFixed(2)}{" "}
-                <span className="line-through text-xs text-gray-400 ml-1">
-                    ₹{cartItem.mrp.toFixed(2)}
-                </span>
-                </p>
-            </div>
-            </div>
-            <div className="col-span-3 text-center text-lg font-semibold">{cartItem.quantity}</div>
-            <div className="col-span-3 text-right font-semibold">
-            ₹ {(cartItem.price * cartItem.quantity).toFixed(2)}
-            </div>
-        </div>
-
-        {/* Similar Products */}
-        <h3 className="mt-10 text-base font-semibold mb-4">Similar Products</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {similarProducts.map((imgSrc, idx) => (
-            <div
-                key={idx}
-                className="border rounded-lg p-3 hover:shadow-md transition-transform hover:-translate-y-1"
-            >
-                <img
-                src={imgSrc}
-                alt="Similar product"
-                className="w-full h-36 object-cover rounded hover:scale-105 transition-transform"
-                />
-                <div className="mt-3">
-                <h4 className="text-sm font-medium">Strawberry - Ooty</h4>
-                <p className="text-xs text-gray-500">200 Grams</p>
-                <div className="flex gap-2 text-sm mt-1">
-                    <p className="font-semibold">₹163.45</p>
-                    <p className="line-through text-gray-400 text-xs">₹215.07</p>
+        {/* Cart Items */}
+        {cartItems.length > 0 ? (
+          cartItems.map((item) => (
+            <div key={item._id} className="grid grid-cols-12 items-center py-4 border-b">
+              <div className="col-span-6 flex items-center gap-4">
+                <img src={item.product.image} alt={item.product.name} className="w-20 h-20 object-cover rounded" />
+                <div>
+                  <p className="font-medium">{item.product.name}</p>
+                  <p className="text-sm text-gray-700">
+                    ₹{item.price.toFixed(2)}{" "}
+                    <span className="line-through text-xs text-gray-400 ml-1">
+                      ₹{item.mrp.toFixed(2)}
+                    </span>
+                  </p>
                 </div>
-                <div className="mt-3 flex justify-between items-center border rounded-md px-2 py-1 text-green-600 text-sm hover:bg-green-50 cursor-pointer transition">
+              </div>
+              <div className="col-span-3 text-center text-lg font-semibold">
+                <div className="flex justify-center items-center gap-2">
+                  <button
+                    onClick={() => handleQuantityChange(item._id, item.quantity - 1)}
+                    className="p-2 border rounded-full"
+                    disabled={item.quantity <= 1}
+                  >
                     <Minus size={14} />
-                    <span>Add</span>
+                  </button>
+                  {item.quantity}
+                  <button
+                    onClick={() => handleQuantityChange(item._id, item.quantity + 1)}
+                    className="p-2 border rounded-full"
+                  >
                     <Plus size={14} />
+                  </button>
                 </div>
-                </div>
+              </div>
+              <div className="col-span-3 text-right font-semibold">
+                ₹ {(item.price * item.quantity).toFixed(2)}
+              </div>
+              <div className="col-span-12 text-right">
+                <button
+                  onClick={() => handleRemoveItem(item._id)}
+                  className="text-red-500 text-sm font-medium"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
-            ))}
-        </div>
-        </div>
-        <Footer />
+          ))
+        ) : (
+          <p>Your cart is empty.</p>
+        )}
+      </div>
+      <Footer />
     </main>
-    
   );
 };
 

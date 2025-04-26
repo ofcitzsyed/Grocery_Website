@@ -10,9 +10,13 @@ class Product:
 
     @staticmethod
     def get_product_by_id(db, product_id):
-        product = db.products.find_one({"_id": ObjectId(product_id)})
-        if product:
-            return Product.serialize(product)
+        # Search in products, featured_products, daily_best_sells
+        collections = ['products', 'featured_products', 'daily_best_sells']
+        for collection_name in collections:
+            collection = db[collection_name]
+            product = collection.find_one({"_id": ObjectId(product_id)})
+            if product:
+                return Product.serialize(product)
         return None
 
     @staticmethod
@@ -35,7 +39,8 @@ class Product:
             "image": product.get("image"),
             "category": product.get("category"),
             "oldPrice": product.get("oldPrice"),
-            "isFeatured": product.get("isFeatured", False)
+            "isFeatured": product.get("is_featured", False),
+            "isBestSeller": product.get("is_best_seller", False)
         }
 
 

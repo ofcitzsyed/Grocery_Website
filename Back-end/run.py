@@ -8,6 +8,7 @@ from routes.auth_routes import auth_routes
 from routes.product_routes import product_routes
 import os
 from dotenv import load_dotenv
+from routes.cart_routes import cart_routes
 
 load_dotenv()
 
@@ -31,6 +32,7 @@ app.config['DB'] = db
 # Register Blueprints
 app.register_blueprint(auth_routes)
 app.register_blueprint(product_routes)
+app.register_blueprint(cart_routes)
 
 if __name__ == "__main__":
     app.run(debug=True)

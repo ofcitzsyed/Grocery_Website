@@ -74,4 +74,12 @@ def login():
         return jsonify({"error": "Incorrect password"}), 401
 
     access_token = create_access_token(identity=str(user['_id']))
-    return jsonify({"access_token": access_token}), 200
+
+    return jsonify({
+        "access_token": access_token,
+        "user": {
+            "id": str(user['_id']),
+            "name": user.get('name', ''),
+            "email": user.get('email', '')
+        }
+    }), 200

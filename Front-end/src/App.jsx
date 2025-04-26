@@ -14,7 +14,8 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/home" element={<MainPage />} />
           <Route path="/cart" element={<Cart />} />
-          <Route path="/product" element={<ProductPage />} />
+          {/* Updated route to include dynamic product id */}
+          <Route path="/product/:id" element={<ProductPage />} />
         </Routes>
       </div>
     </Router>

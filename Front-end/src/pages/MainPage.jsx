@@ -1,49 +1,48 @@
-import React, { useState, useEffect } from "react";
-import { FaPaperPlane } from "react-icons/fa";
-import { ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react";
-import heroBg from "../assets/hero-bg.png";
-import veggiePattern from "../assets/bg-veggi.png";
-import veggieBag from "../assets/veggie-bag.png";
-import Header from "../component/Header";
-import Footer from "../component/Footer";
-
-// Fetch data from APIs
-
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';  // Import useNavigate
+import { FaPaperPlane } from 'react-icons/fa';
+import { ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
+import heroBg from '../assets/hero-bg.png';
+import veggiePattern from '../assets/bg-veggi.png';
+import veggieBag from '../assets/veggie-bag.png';
+import Header from '../component/Header';
+import Footer from '../component/Footer';
 
 const fetchCategories = async () => {
   try {
-    const response = await fetch("http://localhost:5000/api/categories");
+    const response = await fetch('http://localhost:5000/api/categories');
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error fetching categories:", error);
+    console.error('Error fetching categories:', error);
     return [];
   }
 };
 
 const fetchFeaturedProducts = async () => {
   try {
-    const response = await fetch("http://localhost:5000/api/featured_products");
+    const response = await fetch('http://localhost:5000/api/featured_products');
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error fetching featured products:", error);
+    console.error('Error fetching featured products:', error);
     return [];
   }
 };
 
 const fetchDailyBestSells = async () => {
   try {
-    const response = await fetch("http://localhost:5000/api/daily_best_sells");
+    const response = await fetch('http://localhost:5000/api/daily_best_sells');
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error fetching daily best sells:", error);
+    console.error('Error fetching daily best sells:', error);
     return [];
   }
 };
 
 const MainPage = () => {
+  const navigate = useNavigate(); // Initialize useNavigate hook
   const [categories, setCategories] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [dailyBestSells, setDailyBestSells] = useState([]);
@@ -72,13 +71,16 @@ const MainPage = () => {
     if (startIndex + cardsPerPage < featuredProducts.length) setStartIndex(startIndex + 1);
   };
 
+  const handleProductClick = (id) => {
+    navigate(`/product/${id}`); // Navigate to the ProductPage with the product id
+  };
+
   return (
     <main>
       <Header />
-
       {/* Hero Section */}
-      <section className="relative w-full h-[500px] overflow-hidden" style={{ backgroundImage: `url(${heroBg})`, backgroundSize: "cover", backgroundPosition: "center" }}>
-        <div className="absolute inset-0 opacity-60 z-0" style={{ backgroundImage: `url(${veggiePattern})`, backgroundRepeat: "repeat", backgroundSize: "860px" }} />
+      <section className="relative w-full h-[500px] overflow-hidden" style={{ backgroundImage: `url(${heroBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="absolute inset-0 opacity-60 z-0" style={{ backgroundImage: `url(${veggiePattern})`, backgroundRepeat: 'repeat', backgroundSize: '860px' }} />
         <div className="relative z-10 max-w-6xl mx-auto px-8 w-full flex items-center justify-between">
           <div className="max-w-lg space-y-8 py-26 ml-[-178px]">
             <h1 className="text-5xl font-bold text-[#1d2a3b] leading-tight">
@@ -99,6 +101,7 @@ const MainPage = () => {
         </div>
       </section>
 
+
       {/* Explore Categories Section */}
       <div className="px-20 py-10">
         <h2 className="text-3xl font-semibold mb-6 text-gray-800">Explore Categories</h2>
@@ -108,8 +111,11 @@ const MainPage = () => {
           </button>
           <div className="grid grid-cols-4 gap-6 w-full">
             {categories.slice(startIndex, startIndex + 4).map((category, index) => (
-              <div key={category.id || index} className="bg-gray-100 rounded-xl p-5 text-center group transition duration-300 hover:shadow-lg hover:scale-105 cursor-pointer">
-                <img src={`${category.img}`} alt={category.name} className="h-60 mx-auto rounded-xl shadow-md transition-transform duration-300 group-hover:-translate-y-2" />
+              <div
+                key={category.id || index}
+                className="bg-gray-100 rounded-xl p-5 text-center group transition duration-300 hover:shadow-lg hover:scale-105 cursor-pointer"
+              >
+                <img src={`${category.img}`} alt={category.name} className="h-60 mx-auto object-cover rounded-xl shadow-md transition-transform duration-300 group-hover:-translate-y-2" />
                 <h3 className="text-lg font-medium mt-3">{category.name}</h3>
                 <p className="text-sm text-gray-500">{category.items}</p>
               </div>
@@ -121,6 +127,7 @@ const MainPage = () => {
         </div>
       </div>
 
+
       {/* Featured Products Section */}
       <div className="px-20 py-10">
         <h2 className="text-3xl font-semibold mb-6">Featured Products</h2>
@@ -130,7 +137,7 @@ const MainPage = () => {
           </button>
           <div className="grid grid-cols-4 gap-5 w-full">
             {featuredProducts.length > 0 && featuredProducts.slice(startIndex, startIndex + cardsPerPage).map((product, index) => (
-              <div key={product.id || index} className="border p-4 rounded-lg hover:shadow-xl transition">
+              <div key={product.id || index} className="border p-4 rounded-lg hover:shadow-xl transition" onClick={() => handleProductClick(product.id)}>
                 <img src={product.image} alt={product.name} className="h-auto w-full object-contain mb-3" />
                 <p className="text-sm text-gray-500">{product.category}</p>
                 <h3 className="font-semibold">{product.name}</h3>
@@ -148,13 +155,16 @@ const MainPage = () => {
         </div>
       </div>
 
+
+
+
       {/* Daily Best Sells Section */}
       <section className="px-10 py-10 bg-gray-50">
         <h2 className="text-3xl font-bold mb-6">Daily Best Sells</h2>
         <div className="grid grid-cols-4 gap-6">
           {dailyBestSells.slice(0, 4).map((product) => (
-            <div key={product.id} className="relative group p-4 bg-white rounded-xl shadow hover:scale-105 transition-transform duration-300">
-              <img src={product.image} alt={product.name} className="h-auto w-full object-contain mb-3" />
+            <div key={product.id} className="relative group p-4 bg-white rounded-xl shadow hover:scale-105 transition-transform duration-300" onClick={() => handleProductClick(product.id)}>
+              <img src={product.image} alt={product.name} className="h-60 w-full object-contain mb-3" />
               <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-1 py-1 rounded">-20%</div>
               <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
               <p className="text-gray-600 mb-1">Category: {product.category}</p>
