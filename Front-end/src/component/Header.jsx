@@ -1,10 +1,66 @@
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, Heart, ShoppingCart, Search } from 'lucide-react';
 import { FaFire, FaPhoneAlt, FaPercentage, FaPaperPlane, FaHome } from 'react-icons/fa';
 import { MdArrowDropDown } from 'react-icons/md';
-import profileImg from '../assets/profile.jpg';
+import profileImg from '../assets/profile.jpg'; // Default image
 import logo from '../assets/logo.png';
 
-export default function Header() {
+const Header = () => {
+  const [user, setUser] = useState(null);
+  const [cart, setCart] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Fetch user data and cart data from the backend
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      // Fetch user data
+      fetch('/api/user/me', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.user) {
+            setUser(data.user);
+          } else {
+            console.error('User not found');
+            setUser(null); // Set user to null if not found
+          }
+        })
+        .catch((err) => console.error('Error fetching user data:', err));
+
+      // Fetch cart data
+      fetch('/api/cart', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.cart) {
+            setCart(data.cart);
+          } else {
+            console.error('Cart not found');
+            setCart(null); // Set cart to null if not found
+          }
+        })
+        .catch((err) => console.error('Error fetching cart data:', err));
+    }
+  }, []);
+
+  // Logout function
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    setUser(null); // Clear user state
+    setCart(null); // Clear cart state
+    // Redirect to login page (or home page)
+    window.location.href = '/login'; 
+  };
+
   return (
     <div className="w-full shadow-sm bg-white sticky top-0 z-50">
       {/* TopBar Section */}
@@ -42,28 +98,50 @@ export default function Header() {
           <div className="flex items-center space-x-1 text-sm text-gray-800">
             <div className="relative">
               <ShoppingCart className="w-5 h-5" />
-              <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs rounded-full px-1">1</span>
+              <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs rounded-full px-1">{cart ? cart.length : 0}</span>
             </div>
             <div>
               <p className='px-2'>My cart</p>
-              <span className="text-green-600 text-xs px-2">$21</span>
+              <span className="text-green-600 text-xs px-2">${cart ? cart.total : 0}</span>
             </div>
             <ChevronDown className="w-4 h-4" />
           </div>
-          <div className="flex items-center space-x-2">
-            <img
-              src={profileImg}
-              alt="Profile"
-              className="h-8 w-8 rounded-full object-cover ring-2 ring-orange-400"
-            />
-            <p className="text-sm font-medium text-gray-800">Abdul Ahmed</p>
-            <ChevronDown className="w-4 h-4" />
-          </div>
+
+          {/* User Profile Dropdown */}
+          {user ? (
+            <div className="relative">
+              <div 
+                className="flex items-center space-x-2 cursor-pointer"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              >
+                <img
+                  src={user.profileImg || profileImg} // Use the user's profile image or default
+                  alt="Profile"
+                  className="h-8 w-8 rounded-full object-cover ring-2 ring-orange-400"
+                />
+                <p className="text-sm font-medium text-gray-800">{user.name}</p>
+                <ChevronDown className="w-4 h-4" />
+              </div>
+
+              {/* Dropdown Menu */}
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border w-48">
+                  <ul className="py-2 text-sm text-gray-800">
+                    <li className="px-4 py-2 cursor-pointer" onClick={handleLogout}>
+                      Logout
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-800">Login</p>
+          )}
         </div>
       </div>
 
       {/* MainNav Section */}
-      <nav className="w-full flex items-center justify-between px-12 py-3 bg-white ">
+      <nav className="w-full flex items-center justify-between px-12 py-3 bg-white">
         {/* Left - Browse Categories Button */}
         <button className="bg-green-500 text-white font-medium px-5 py-2 rounded-md flex items-center gap-1 shadow-sm">
           Browse All Categories
@@ -99,4 +177,6 @@ export default function Header() {
       </nav>
     </div>
   );
-}
+};
+
+export default Header;

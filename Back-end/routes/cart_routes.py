@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from models.cart_model import Cart
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 cart_routes = Blueprint('cart_routes', __name__)
 
@@ -45,3 +46,19 @@ def delete_cart_item(cart_item_id):
     if success:
         return jsonify({"message": "Cart item deleted successfully"}), 200
     return jsonify({"error": "Cart item not found"}), 404
+
+
+# In cart_routes.py or a similar file
+# @cart_routes.route('/api/cart', methods=['GET'])
+# @jwt_required()
+# def get_cart():
+#     user_id = get_jwt_identity()  # Get user ID from the token
+#     cart = db.cart.find_one({"user_id": ObjectId(user_id)})
+    
+#     if cart:
+#         return jsonify({
+#             "cart": cart["items"],  # Example field "items" in the cart collection
+#             "total": cart["total"]
+#         })
+#     else:
+#         return jsonify({"error": "Cart not found"}), 404

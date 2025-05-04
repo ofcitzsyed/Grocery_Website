@@ -9,16 +9,20 @@ import {
   Linkedin,
 } from "lucide-react";
 
+import logo from "../assets/logo.png";
+import visa from "../assets/visa.png";
+import mastercard from "../assets/mastercard.png";
+import amex from "../assets/amex.png";
+
 const Footer = () => {
   return (
-    <footer className="bg-white text-gray-700 px-6 lg:px-26 py-12  mt-10">
+    <footer className="bg-white text-gray-700 px-6 lg:px-26 py-12 mt-10">
       <div className="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
 
         {/* Brand Info */}
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <img src="/assets/logo.png" alt="Groceyish" className="h-10 w-auto" />
-            <h2 className="text-xl font-bold text-green-600">Groceyish</h2>
+            <img src={logo} alt="Groceyish" className="h-10 w-auto" />
           </div>
           <ul className="space-y-2 text-sm text-gray-600">
             <li className="flex gap-2">
@@ -79,9 +83,9 @@ const Footer = () => {
 
         {/* Payment Icons */}
         <div className="flex items-center gap-4">
-          <img src="/assets/visa.png" alt="Visa" className="h-6 w-auto" />
-          <img src="/assets/mastercard.png" alt="Mastercard" className="h-6 w-auto" />
-          <img src="/assets/amex.png" alt="Amex" className="h-6 w-auto" />
+          <img src={visa} alt="Visa" className="h-6 w-auto" />
+          <img src={mastercard} alt="Mastercard" className="h-6 w-auto" />
+          <img src={amex} alt="Amex" className="h-6 w-auto" />
         </div>
 
         {/* Social Icons */}
