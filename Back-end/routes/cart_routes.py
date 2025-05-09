@@ -10,11 +10,14 @@ def add_to_cart():
     user_id = data.get('user_id')
     product_id = data.get('product_id')
     quantity = data.get('quantity', 1)
+    product = data.get("product")
+    price = data.get("price", 0)
+    mrp = data.get("mrp", 0)
 
     if not user_id or not product_id:
         return jsonify({"error": "User ID and Product ID are required"}), 400
 
-    cart_item = Cart.add_to_cart(user_id, product_id, quantity)
+    cart_item = Cart.add_to_cart(user_id, product_id, quantity, product, price, mrp)
     return jsonify({"message": "Item added to cart", "cart_item": cart_item}), 201
 
 @cart_routes.route('/api/cart', methods=['GET'])

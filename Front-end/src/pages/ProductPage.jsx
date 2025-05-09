@@ -52,6 +52,17 @@ const ProductPage = () => {
           user_id: userId,
           product_id: product.id,
           quantity,
+          // Hardcoded patch
+          product: {
+            id: product.id,
+            name: product.name,
+            image: product.image,
+            price: product.price,
+            mrp: product.oldPrice || product.price,
+            weight: product.weight || ""
+          },
+          price: product.price,
+          mrp: product.oldPrice || product.price,
         }),
       });
 
